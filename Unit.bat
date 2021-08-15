@@ -1,0 +1,1 @@
+echo "Project Unit : %date% : %time%"
