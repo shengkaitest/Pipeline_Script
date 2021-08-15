@@ -1,47 +1,59 @@
 pipeline {
     agent any
     stages {
-        stage('Compile') {
+        stage('Git-Checkout') {
             steps {
-                    echo "Complied Successfully!!";
+                    echo "Checking out from Git Repo";
+                    git 'https://github.com/shengkaitest/Pipeline_Script.git'
+                    sh 'ls'
+                    sh 'chmod -R 777 *.sh'
             }
         }
     
-        stage('JUnit') {
+        stage('Build') {
             steps {
-                    echo "JUnit Passed Successfully!!";
+                    echo "Building the checked-out project!";
+                    sh returnStdout: true, script: '${WORKSPACE}/Build.sh'
             }
         }
     
-        stage('Quality-Gate') {
+        stage('Unit-Test') {
             steps {
-                    echo "SonarQube Quality Passed Successfully!!";
-                // sh exit("1");
+                    echo "Running JUnit Tests";
+                    sh 'Unit.sh'
             }
         }
     
+        stage('Quality-Gete') {
+            steps {
+                    echo "Verifying Quality Gates";
+                    sh 'Quality.sh'
+            }
+        }
+
         stage('Deploy') {
             steps {
-                    echo "Pass!!";
+                    echo "Deploying to Stage Evironment for more tests";
+                    sh 'Deploy.sh'
             }
         }
     }
     post {
-    always {
-        echo 'This will always run'
+        always {
+            echo 'This will always run'
+        }
+        success {
+            echo 'This will run only if successful'
+        }
+        failure {
+            echo 'This will run only if failed'
+        }
+        unstable {
+            echo 'This will run only if the run was marked as unstable'
+        }
+        changed {
+            echo 'This will run only if the state of the Pipline has changed'
+            echo 'For example, if the Pipline was previusly failing but is now successful'
+        }
     }
-    success {
-        echo 'This will run only if successful'
-    }
-    failure {
-        echo 'This will run only if failed'
-    }
-    unstable {
-        echo 'This will run only if the run was marked as unstable'
-    }
-    changed {
-        echo 'This will run only if the state of the Pipline has changed'
-        echo 'For example, if the Pipline was previusly failing but is now successful'
-    }
-}
 }
